@@ -3,6 +3,7 @@ import 'package:live_activities/live_activities.dart';
 import 'package:live_activities/live_activities_platform_interface.dart';
 import 'package:live_activities/live_activities_method_channel.dart';
 import 'package:live_activities/models/activity_update.dart';
+import 'package:live_activities/models/alert_config.dart';
 import 'package:live_activities/models/live_activity_state.dart';
 import 'package:live_activities/models/url_scheme_data.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -11,7 +12,7 @@ class MockLiveActivitiesPlatform
     with MockPlatformInterfaceMixin
     implements LiveActivitiesPlatform {
   @override
-  Future init(String appGroupId) {
+  Future init(String appGroupId, {String? urlScheme}) {
     return Future.value();
   }
 
@@ -26,11 +27,6 @@ class MockLiveActivitiesPlatform
 
   @override
   Future endActivity(String activityId) {
-    return Future.value();
-  }
-
-  @override
-  Future updateActivity(String activityId, Map<String, dynamic> data) {
     return Future.value();
   }
 
@@ -81,6 +77,17 @@ class MockLiveActivitiesPlatform
     };
     return Stream.value(ActivityUpdate.fromMap(map));
   }
+
+  @override
+  Future updateActivity(String activityId, Map<String, dynamic> data,
+      [AlertConfig? alertConfig]) {
+    return Future.value();
+  }
+
+  @override
+  Future<Map<String, LiveActivityState>> getAllActivities() {
+    return Future.value({'ACTIVITY_ID': LiveActivityState.active});
+  }
 }
 
 void main() {
@@ -110,8 +117,14 @@ void main() {
     expect(await liveActivitiesPlugin.endAllActivities(), null);
   });
 
-  test('getAllActivities', () async {
+  test('getAllActivitiesIds', () async {
     expect(await liveActivitiesPlugin.getAllActivitiesIds(), ['ACTIVITY_ID']);
+  });
+
+  test('getAllActivities', () async {
+    expect(await liveActivitiesPlugin.getAllActivities(), {
+      'ACTIVITY_ID': LiveActivityState.active,
+    });
   });
 
   test('areActivitiesEnabled', () async {

@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:app_group_directory/app_group_directory.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:live_activities/models/live_activity_image.dart';
 import 'package:path_provider/path_provider.dart';
@@ -35,34 +35,34 @@ class AppGroupsImageService {
         late File file;
         late String fileName;
         if (value is LiveActivityImageFromAsset) {
-          final assetImagePath = value;
-          final byteData = await rootBundle.load(assetImagePath.path);
-          fileName = (assetImagePath.path.split('/').last);
-
-          file = File('${tempDir.path}/$fileName');
-          await file.writeAsBytes(byteData.buffer
-              .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+          fileName = (value.path.split('/').last);
         } else if (value is LiveActivityImageFromUrl) {
-          final urlImagePath = value;
-          fileName = (urlImagePath.url.split('/').last);
-
-          final ByteData imageData =
-              await NetworkAssetBundle(Uri.parse(urlImagePath.url)).load("");
-          final Uint8List bytes = imageData.buffer.asUint8List();
-          file = await File('${tempDir.path}/$fileName').create();
-          file.writeAsBytesSync(bytes);
+          fileName = (value.url.split('/').last);
+        } else if (value is LiveActivityImageFromMemory) {
+          fileName = value.imageName;
         }
 
-        if (value.resizeFactor != 1) {
-          ImageProperties properties =
-              await FlutterNativeImage.getImageProperties(file.path);
+        final bytes = await value.loadImage();
+        file = await File('${tempDir.path}/$fileName').create();
+        file.writeAsBytesSync(bytes);
 
-          final targetWidth = (properties.width! * value.resizeFactor).round();
+        if (value.resizeFactor != 1) {
+          final buffer = await ImmutableBuffer.fromUint8List(bytes);
+          final descriptor = await ImageDescriptor.encoded(buffer);
+          final imageWidth = descriptor.width;
+          final imageHeight = descriptor.height;
+
+          assert(
+            imageWidth > 0,
+            'Please make sure you are using an image that is not corrupt or too small',
+          );
+
+          final targetWidth = (imageWidth * value.resizeFactor).round();
+
           file = await FlutterNativeImage.compressImage(
             file.path,
             targetWidth: targetWidth,
-            targetHeight:
-                (properties.height! * targetWidth / properties.width!).round(),
+            targetHeight: (imageHeight * targetWidth / imageWidth).round(),
           );
         }
 
