@@ -77,13 +77,29 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     if (call.method == "areActivitiesEnabled") {
       if #available(iOS 16.1, *) {
+          if ProcessInfo.processInfo.isiOSAppOnMac {
+              return result(false)
+          }
         result(ActivityAuthorizationInfo().areActivitiesEnabled)
       } else {
         result(false)
       }
       return
+    } else if call.method == "isiOSAppOnMac" {
+        if #available(iOS 14.0, *) {
+            result(ProcessInfo.processInfo.isiOSAppOnMac)
+        } else {
+            result(false)
+        }
+        return
     }
     
+      if #available(iOS 14.0, *) {
+          if ProcessInfo.processInfo.isiOSAppOnMac {
+              return result(nil)
+          }
+      }
+      
     if #available(iOS 16.1, *) {
       switch call.method {
         case "init":
@@ -112,7 +128,8 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
           if let data = args["data"] as? [String: Any] {
             let removeWhenAppIsKilled = args["removeWhenAppIsKilled"] as? Bool ?? false
             let staleIn = args["staleIn"] as? Int? ?? nil
-            createActivity(data: data, removeWhenAppIsKilled: removeWhenAppIsKilled, staleIn: staleIn, result: result)
+              let uuid = args["uuid"] as? String
+              createActivity(data: data, removeWhenAppIsKilled: removeWhenAppIsKilled, staleIn: staleIn, uuid: uuid, result: result)
           } else {
             result(FlutterError(code: "WRONG_ARGS", message: "argument are not valid, check if 'data' is valid", details: nil))
           }
@@ -186,7 +203,7 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
   }
   
   @available(iOS 16.1, *)
-  func createActivity(data: [String: Any], removeWhenAppIsKilled: Bool, staleIn: Int?, result: @escaping FlutterResult) {
+    func createActivity(data: [String: Any], removeWhenAppIsKilled: Bool, staleIn: Int?, uuid: String?, result: @escaping FlutterResult) {
     let center = UNUserNotificationCenter.current()
     center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
       
@@ -196,8 +213,13 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
     }
 
     
-    let liveDeliveryAttributes = LiveActivitiesAppAttributes()
-    let initialContentState = LiveActivitiesAppAttributes.LiveDeliveryData(appGroupId: appGroupId!)
+        let liveDeliveryAttributes: LiveActivitiesAppAttributes
+        if let uuidString = uuid, let id = UUID(uuidString: uuidString) {
+            liveDeliveryAttributes = LiveActivitiesAppAttributes(id: id)
+        } else {
+            liveDeliveryAttributes = LiveActivitiesAppAttributes()
+        }
+        let initialContentState = LiveActivitiesAppAttributes.LiveDeliveryData(flightId: nil, pnr: nil, origin: nil, destination: nil, flightNumber: nil, std: nil, etd: nil, atd: nil, sta: nil, eta: nil, ata: nil, flightStatus: nil, statusColorCode: nil, boardingTime: nil, gate: nil, terminal: nil, boardingProgress: nil, boardingStatus: nil, seat: nil)
     var deliveryActivity: Activity<LiveActivitiesAppAttributes>?
     let prefix = liveDeliveryAttributes.id
 
@@ -252,7 +274,7 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
             }
           }
           
-          let updatedStatus = LiveActivitiesAppAttributes.LiveDeliveryData(appGroupId: self.appGroupId!)
+            let updatedStatus = LiveActivitiesAppAttributes.LiveDeliveryData(flightId: nil, pnr: nil, origin: nil, destination: nil, flightNumber: nil, std: nil, etd: nil, atd: nil, sta: nil, eta: nil, ata: nil, flightStatus: nil, statusColorCode: nil, boardingTime: nil, gate: nil, terminal: nil, boardingProgress: nil, boardingStatus: nil, seat: nil)
           await activity.update(using: updatedStatus, alertConfiguration: alertConfig?.getAlertConfig())
           break;
         }
@@ -303,6 +325,8 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
   func endAllActivities(result: @escaping FlutterResult) {
     Task {
       for activity in Activity<LiveActivitiesAppAttributes>.activities {
+          sharedDefault?.removeObject(forKey: "liveActivityBooking-\(activity.id.lowercased())")
+          sharedDefault?.removeObject(forKey: "homeBoardingProgress-\(activity.id.lowercased())")
         await activity.end(dismissalPolicy: .immediate)
       }
       appLifecycleLifeActiviyIds.removeAll()
@@ -334,6 +358,8 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
   private func endActivitiesWithId(activityIds: [String]) async {
     for activity in Activity<LiveActivitiesAppAttributes>.activities {
       if (activityIds.contains { $0 == activity.id }) {
+          sharedDefault?.removeObject(forKey: "liveActivityBooking-\(activity.id.lowercased())")
+          sharedDefault?.removeObject(forKey: "homeBoardingProgress-\(activity.id.lowercased())")
         await activity.end(dismissalPolicy: .immediate)
       }
     }
@@ -363,9 +389,11 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
   
   public func applicationWillTerminate(_ application: UIApplication) {
     if #available(iOS 16.1, *) {
-      Task {
-        await self.endActivitiesWithId(activityIds: self.appLifecycleLifeActiviyIds)
-      }
+        if !ProcessInfo.processInfo.isiOSAppOnMac {
+            Task {
+                await self.endActivitiesWithId(activityIds: self.appLifecycleLifeActiviyIds)
+            }
+        }
     }
   }
   
@@ -373,7 +401,25 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
     public typealias LiveDeliveryData = ContentState
     
     public struct ContentState: Codable, Hashable {
-      var appGroupId: String
+        let flightId: String?
+        let pnr: String?
+        let origin: String?
+        let destination: String?
+        let flightNumber: String?
+        let std: String?
+        let etd: String?
+        let atd: String?
+        let sta: String?
+        let eta: String?
+        let ata: String?
+        let flightStatus: String?
+        let statusColorCode: String?
+        let boardingTime: String?
+        let gate: String?
+        let terminal: String?
+        let boardingProgress: String?
+        let boardingStatus: String?
+        let seat: String?
     }
     
     var id = UUID()
