@@ -224,7 +224,7 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
     let prefix = liveDeliveryAttributes.id
 
     for item in data {
-        sharedDefault!.set(item.value, forKey: "\(prefix)_\(item.key)")
+        sharedDefault!.set(item.value, forKey: item.key)
     }
 
     if #available(iOS 16.2, *){
@@ -268,9 +268,9 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
 
           for item in data {
             if (item.value != nil && !(item.value is NSNull)) {
-              sharedDefault!.set(item.value, forKey: "\(prefix)_\(item.key)")
+              sharedDefault!.set(item.value, forKey: item.key)
             } else {
-              sharedDefault!.removeObject(forKey: "\(prefix)_\(item.key)")
+              sharedDefault!.removeObject(forKey: item.key)
             }
           }
           
