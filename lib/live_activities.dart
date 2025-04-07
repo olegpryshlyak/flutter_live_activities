@@ -136,4 +136,6 @@ class LiveActivities {
   /// ))
   /// ```
   Stream<ActivityUpdate> get activityUpdateStream => LiveActivitiesPlatform.instance.activityUpdateStream;
+
+  Stream<String?> get pushToStartTokenStream => LiveActivitiesPlatform.instance.pushToStartTokenStream;
 }

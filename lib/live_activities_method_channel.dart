@@ -129,4 +129,10 @@ class MethodChannelLiveActivities extends LiveActivitiesPlatform {
       .receiveBroadcastStream('activityUpdateStream')
       .distinct()
       .map((event) => ActivityUpdate.fromMap(Map<String, dynamic>.from(event)));
+
+  @override
+  Stream<String?> get pushToStartTokenStream => activityStatusChannel
+      .receiveBroadcastStream('pushToStartTokenStream')
+      .distinct()
+      .map((event) => event is String ? event : null);
 }

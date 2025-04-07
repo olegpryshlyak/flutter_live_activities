@@ -85,4 +85,7 @@ abstract class LiveActivitiesPlatform extends PlatformInterface {
 
   Stream<ActivityUpdate> get activityUpdateStream =>
       throw UnimplementedError('pushTokenUpdates has not been implemented');
+
+  Stream<String?> get pushToStartTokenStream =>
+      throw UnimplementedError('pushToStartToken has not been implemented');
 }
