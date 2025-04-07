@@ -119,6 +119,12 @@ class MethodChannelLiveActivities extends LiveActivitiesPlatform {
   }
 
   @override
+  Future<String?> getPushToStartToken() async {
+    final result = await methodChannel.invokeMethod<String?>('getPushToStartToken');
+    return result;
+  }
+
+  @override
   Future<bool> isiOSAppOnMac() async {
     final result = await methodChannel.invokeMethod<bool?>('isiOSAppOnMac');
     return result == true;

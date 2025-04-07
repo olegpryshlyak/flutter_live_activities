@@ -181,6 +181,15 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
                     result(FlutterError(code: "WRONG_ARGS", message: "argument are not valid, check if 'activityId' is valid", details: nil))
                 }
                 break
+            case "getPushToStartToken":
+                if #available(iOS 17.2, *) {
+                    let tokenDate = Activity<LiveActivitiesAppAttributes>.pushToStartToken
+                    let pushToken = data.map { String(format: "%02x", $0) }.joined()
+                    result(pushToken)
+                } else {
+                    result(nil)
+                }
+                
             case "getPushToken":
                 guard let args = call.arguments  as? [String: Any] else {
                     return
