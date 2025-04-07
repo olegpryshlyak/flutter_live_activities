@@ -184,7 +184,7 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
             case "getPushToStartToken":
                 if #available(iOS 17.2, *) {
                     let tokenData = Activity<LiveActivitiesAppAttributes>.pushToStartToken
-                    let pushToken = tokenData.map { String(format: "%02x", $0) }.joined()
+                    let pushToken = tokenData?.map { String(format: "%02x", $0) }.joined()
                     result(pushToken)
                 } else {
                     result(nil)
