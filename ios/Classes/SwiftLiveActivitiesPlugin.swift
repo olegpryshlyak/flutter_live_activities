@@ -391,6 +391,30 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
         }
     }
     
+    public func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [AnyHashable : Any] = [:]) -> Bool {
+        if let url = launchOptions[UIApplication.LaunchOptionsKey.url] as? URL {
+            let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            
+            if components?.scheme == nil || components?.scheme != urlScheme { return false }
+            
+            var queryResult: Dictionary<String, Any> = Dictionary()
+            
+            queryResult["queryItems"] = components?.queryItems?.map({ (item) -> Dictionary<String, String> in
+                var queryItemResult: Dictionary<String, String> = Dictionary()
+                queryItemResult["name"] = item.name
+                queryItemResult["value"] = item.value
+                return queryItemResult
+            })
+            queryResult["scheme"] = components?.scheme
+            queryResult["host"] = components?.host
+            queryResult["path"] = components?.path
+            queryResult["url"] = components?.url?.absoluteString
+            
+            urlSchemeSink?.self(queryResult)
+        }
+        return true
+    }
+    
     public func application(_ application: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         
