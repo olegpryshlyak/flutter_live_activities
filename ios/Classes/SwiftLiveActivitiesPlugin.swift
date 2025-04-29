@@ -32,12 +32,14 @@ public class SwiftLiveActivitiesPlugin: NSObject, FlutterPlugin, FlutterStreamHa
         let channel = FlutterMethodChannel(name: "live_activities", binaryMessenger: registrar.messenger())
         let urlSchemeChannel = FlutterEventChannel(name: "live_activities/url_scheme", binaryMessenger: registrar.messenger())
         let activityStatusChannel = FlutterEventChannel(name: "live_activities/activity_status", binaryMessenger: registrar.messenger())
+        let pushToStartTokenChannel = FlutterEventChannel(name: "live_activities/push_to_start_token", binaryMessenger: registrar.messenger())
         
         let instance = SwiftLiveActivitiesPlugin()
         
         registrar.addMethodCallDelegate(instance, channel: channel)
         urlSchemeChannel.setStreamHandler(instance)
         activityStatusChannel.setStreamHandler(instance)
+        pushToStartTokenChannel.setStreamHandler(instance)
         registrar.addApplicationDelegate(instance)
     }
     

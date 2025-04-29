@@ -238,6 +238,31 @@ class _HomeState extends State<Home> {
                     ],
                   ),
                 ),
+              TextButton(
+                onPressed: () async {
+                  final supported =
+                  await _liveActivitiesPlugin.getPushToStartToken();
+                  if (context.mounted) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: Text(
+                            supported ?? 'no token',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: const Text('Get push to start token'),
+              ),
             ],
           ),
         ),

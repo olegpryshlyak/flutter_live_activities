@@ -20,6 +20,9 @@ class MethodChannelLiveActivities extends LiveActivitiesPlatform {
   final activityStatusChannel = const EventChannel('live_activities/activity_status');
 
   @visibleForTesting
+  final pushToStartTokenChannel = const EventChannel('live_activities/push_to_start_token');
+
+  @visibleForTesting
   final EventChannel urlSchemeChannel = const EventChannel('live_activities/url_scheme');
 
   @override
@@ -137,7 +140,7 @@ class MethodChannelLiveActivities extends LiveActivitiesPlatform {
       .map((event) => ActivityUpdate.fromMap(Map<String, dynamic>.from(event)));
 
   @override
-  Stream<String?> get pushToStartTokenStream => activityStatusChannel
+  Stream<String?> get pushToStartTokenStream => pushToStartTokenChannel
       .receiveBroadcastStream('pushToStartTokenStream')
       .distinct()
       .map((event) => event is String ? event : null);
