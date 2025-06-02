@@ -30,12 +30,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
 
 SPEC CHECKSUMS:
-  app_group_directory: 7bf9f8f9819ead554de29da7c25fb7a680d6a9a0
+  app_group_directory: a2613caae8f771366673bd6ec80412b76bbb4fb4
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_native_image: 9c0b7451838484458e5b0fae007b86a4c2d4bdfe
-  live_activities: 9ff56a06a2d43ecd68f56deeed13b18a8304789c
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  flutter_native_image: c0f200e4bc5da392b15878df38654cc85a78b090
+  live_activities: 771ebe091f68bc3dc0a5a3828f2747b01126ec28
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
 
 PODFILE CHECKSUM: c4c93c5f6502fe2754f48404d3594bf779584011
 
-COCOAPODS: 1.16.1
+COCOAPODS: 1.16.2

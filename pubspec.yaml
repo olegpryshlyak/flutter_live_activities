@@ -39,6 +39,3 @@ flutter:
     platforms:
       ios:
         pluginClass: LiveActivitiesPlugin
-      android:
-        package: com.flutter_live_activities
-        pluginClass: FlutterLiveActivitiesPlugin
